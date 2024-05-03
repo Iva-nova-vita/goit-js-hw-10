@@ -24,9 +24,7 @@ const options = {
     userSelectedDate = selectedDates[0];
     initialDate = new Date();
     const isDateValid = userSelectedDate - initialDate > 0;
-    isDateValid
-      ? refs.btnStart.disabled = false
-      : showNotification();
+    isDateValid ? (refs.btnStart.disabled = false) : showNotification();
   },
 };
 
@@ -50,18 +48,20 @@ function countDown() {
   refs.datetimePicker.disabled = true;
   let time = userSelectedDate - initialDate;
 
-  for (let index = 0; index < time; index += 1000) {
-    setTimeout(() => {
-      const date = convertMs(time);
-      const { days, hours, minutes, seconds } = date;
-      refs.days.innerHTML = addLeadingZero(days);
-      refs.hours.innerHTML = addLeadingZero(hours);
-      refs.minutes.innerHTML = addLeadingZero(minutes);
-      refs.seconds.innerHTML = addLeadingZero(seconds);
-      time -= 1000;
-      time <= 0 && (refs.datetimePicker.disabled = false);
-    }, index);
-  }
+  const timer = setInterval(() => {
+    const date = convertMs(time);
+    const { days, hours, minutes, seconds } = date;
+    refs.days.innerHTML = days;
+    refs.hours.innerHTML = hours;
+    refs.minutes.innerHTML = minutes;
+    refs.seconds.innerHTML = seconds;
+    time -= 1000;
+    if (time <= 0) {
+      refs.datetimePicker.disabled = false;
+      clearInterval(timer);
+      return
+    }
+  }, 1000);
 }
 
 function convertMs(ms) {
@@ -72,13 +72,15 @@ function convertMs(ms) {
   const day = hour * 24;
 
   // Remaining days
-  const days = Math.floor(ms / day);
+  const days = addLeadingZero(Math.floor(ms / day));
   // Remaining hours
-  const hours = Math.floor((ms % day) / hour);
+  const hours = addLeadingZero(Math.floor((ms % day) / hour));
   // Remaining minutes
-  const minutes = Math.floor(((ms % day) % hour) / minute);
+  const minutes = addLeadingZero(Math.floor(((ms % day) % hour) / minute));
   // Remaining seconds
-  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+  const seconds = addLeadingZero(
+    Math.floor((((ms % day) % hour) % minute) / second)
+  );
 
   return { days, hours, minutes, seconds };
 }
